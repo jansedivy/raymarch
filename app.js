@@ -18,15 +18,6 @@ var get = function(url, callback) {
   request.send(null);
 };
 
-var normalizeAngle = function(angle) {
-  angle = angle % (2 * Math.PI);
-  if (angle >= 0) {
-    return angle;
-  } else {
-    return angle + 2 * Math.PI;
-  }
-};
-
 var canvas = document.querySelector('canvas');
 var width = canvas.width = window.innerWidth;
 var height = canvas.height = window.innerHeight;
@@ -49,12 +40,10 @@ var program = null;
 var position = [0, 10, 0];
 var velocity = [0, 0.1, 0];
 var rotation = [0, 0, 0];
+var angle = [0, 0, 0];
 var cameraMatrix = mat4.create();
 
-var lookat = [1, 0, 0];
-
 var cameraPositionId = null;
-var cameraLookatId = null;
 var resolutionId = null;
 var cameraId = null;
 
@@ -94,8 +83,21 @@ var createProgram = function() {
   resolutionId = gl.getUniformLocation(program, 'iResolution');
   cameraId = gl.getUniformLocation(program, 'camera');
   cameraPositionId = gl.getUniformLocation(program, 'camera_position');
-  cameraLookatId = gl.getUniformLocation(program, 'camera_lookat');
 };
+
+  var vertices = [
+    -1.0, -1.0,
+    1.0, -1.0,
+    -1.0, 1.0,
+
+    1.0, -1.0,
+    1.0, 1.0,
+    -1.0, 1.0
+  ];
+
+  var buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
 var run = function() {
   position[0] += velocity[0];
@@ -119,15 +121,11 @@ var run = function() {
   velocity[1] *= 0.96;
   velocity[2] *= 0.96;
 
-  rotation[0] += 0.01;
+  angle[1] += 0.01;
 
-  rotation[0] = normalizeAngle(rotation[0]);
-  rotation[1] = normalizeAngle(rotation[1]);
-  rotation[2] = normalizeAngle(rotation[2]);
-
-  lookat[0] = Math.sin(rotation[1]) * Math.cos(rotation[0]);
-  lookat[1] = -Math.sin(rotation[0]);
-  lookat[2] = -Math.cos(rotation[1]) * Math.cos(rotation[0]);
+  rotation[0] = Math.sin(angle[1]) * Math.cos(angle[0]);
+  rotation[1] = -Math.sin(angle[0]);
+  rotation[2] = -Math.cos(angle[1]) * Math.cos(angle[0]);
 
   mat4.identity(cameraMatrix);
 
@@ -135,7 +133,7 @@ var run = function() {
 
   mat4.rotateX(cameraMatrix, cameraMatrix, rotation[0]);
   mat4.rotateY(cameraMatrix, cameraMatrix, rotation[1]);
-  mat4.rotateZ(cameraMatrix, cameraMatrix, rotation[2]);
+  // mat4.rotateZ(cameraMatrix, cameraMatrix, rotation[2]);
 
   if (position[1] < 2) {
     position[1] = 2;
@@ -147,25 +145,11 @@ var run = function() {
   gl.useProgram(program);
   gl.enableVertexAttribArray(0);
 
-  var vertices = [
-    -1.0, -1.0,
-    1.0, -1.0,
-    -1.0, 1.0,
-
-    1.0, -1.0,
-    1.0, 1.0,
-    -1.0, 1.0
-  ];
-
-  var buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
   gl.uniform2fv(resolutionId, resolution);
   gl.uniformMatrix4fv(cameraId, false, cameraMatrix);
   gl.uniform3fv(cameraPositionId, position);
-  gl.uniform3fv(cameraLookatId, lookat);
 
+  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
   gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
@@ -217,4 +201,12 @@ document.addEventListener('keydown', function(e) {
   if (e.keyCode === 82) { // r
     reload();
   }
+});
+
+document.addEventListener('mousemove', function(e) {
+  var x = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
+  var y = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
+
+  // angle[0] += x / 300;
+  // angle[1] += y / 300;
 });

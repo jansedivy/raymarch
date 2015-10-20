@@ -4,7 +4,6 @@ float iGlobalTime = 0.0;
 
 uniform vec2 iResolution;
 uniform vec3 camera_position;
-uniform vec3 camera_lookat;
 
 uniform mat4 camera;
 
@@ -150,7 +149,6 @@ void main(void) {
 
   // camera
   vec3 ro = camera_position;
-  vec3 ta = camera_position + normalize(camera_lookat);
 
   vec4 rd = camera * vec4(normalize(vec3(p.xy,2.0)), 1.0);
 
