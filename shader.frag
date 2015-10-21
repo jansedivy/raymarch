@@ -4,6 +4,7 @@ uniform float time;
 
 uniform vec2 iResolution;
 
+uniform vec3 camera_position;
 uniform mat4 camera;
 
 float torus(vec3 p, vec2 t) {
@@ -23,7 +24,7 @@ float map(vec3 p) {
   vec3 c = vec3(2.0);
   vec3 q = mod(p, c)-0.5*c;
 
-  return opTwist(q, p.x+p.y);
+  return opTwist(q, p.x+p.y+p.z);
 }
 
 float trace(vec3 o, vec3 r) {
@@ -47,16 +48,15 @@ void main(void) {
 
   uv = uv * 2.0 - 1.0;
 
-  uv.x *= iResolution.x/iResolution.y;
-
   vec3 r = normalize(vec3(uv, 1.0));
 
   float the = time * 0.25;
-  r.xz *= mat2(cos(the), -sin(the), sin(the), cos(the));
 
-  vec3 o = vec3(0.0, 0.0, time);
+  r = vec3(camera * vec4(r, 1.0));
 
-  float t = trace(o, r);
+  /* r.xz *= mat2(cos(the), -sin(the), sin(the), cos(the)); */
+
+  float t = trace(camera_position, r);
 
   float fog = 1.0 / (1.0 + t * t * 0.1);
 
