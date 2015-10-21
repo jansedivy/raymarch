@@ -60,7 +60,7 @@ void main(void) {
 
   float fog = 1.0 / (1.0 + t * t * 0.1);
 
-  vec3 fc = vec3(fog);
+  vec3 fc = vec3(fog) * vec3(0.1, 0.8, 0.9);
 
   gl_FragColor = vec4(fc, 1.0);
 }
