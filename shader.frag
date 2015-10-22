@@ -12,9 +12,13 @@ float torus(vec3 p, vec2 t) {
   return length(q)-t.y;
 }
 
+float rand(vec3 co){
+    return fract(sin(dot(co.xyz ,vec3(12.9898,78.233, 42.3432))) * 43758.5453);
+}
+
 vec3 opTwist(vec3 p) {
-  float c = cos(8.0*p.y);
-  float s = sin(8.0*p.y);
+  float c = cos(sin(time)*10.0*p.y);
+  float s = sin(sin(time)*10.0*p.y);
   mat2 m = mat2(c,-s,s,c);
   return vec3(m*p.xz,p.y);
 }

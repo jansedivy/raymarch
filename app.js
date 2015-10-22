@@ -1,13 +1,4 @@
-var keys = {};
 var mat4 = require('gl-matrix').mat4;
-
-document.addEventListener('keydown', function(e) {
-  keys[e.keyCode] = true;
-});
-
-document.addEventListener('keyup', function(e) {
-  keys[e.keyCode] = false;
-});
 
 var get = function(url, callback) {
   var request = new XMLHttpRequest();
@@ -26,14 +17,11 @@ var canvas = document.querySelector('canvas');
 var width = canvas.width = window.innerWidth;
 var height = canvas.height = window.innerHeight;
 var resolution = [width, height];
+var keys = {};
 
 canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
 
 var gl = canvas.getContext('webgl');
-
-gl.clearColor(0, 0, 0, 1);
-
-var fs = require('fs');
 
 var fragReady = false;
 var vertReady = false;
@@ -43,17 +31,15 @@ var fragmentSource = '';
 
 var program = null;
 
-var position = [0, 10, 0];
-var velocity = [0, 0.1, 0];
+var position = [0, 0, 0];
+var velocity = [0, 0, 0];
 var rotation = [0, 0, 0];
 var forward = [0, 0, 0];
 var cameraMatrix = mat4.create();
 var invertCameraMatrix = mat4.create();
 
-var cameraPositionId = null;
-var resolutionId = null;
-var timeId = null;
-var cameraId = null;
+var uniforms = {
+};
 
 var createProgram = function() {
   if (program) {
@@ -88,27 +74,27 @@ var createProgram = function() {
 
   gl.useProgram(program);
 
-  resolutionId = gl.getUniformLocation(program, 'iResolution');
-  timeId = gl.getUniformLocation(program, 'time');
-  cameraId = gl.getUniformLocation(program, 'camera');
-  cameraPositionId = gl.getUniformLocation(program, 'camera_position');
+  uniforms.resolution = gl.getUniformLocation(program, 'iResolution');
+  uniforms.time = gl.getUniformLocation(program, 'time');
+  uniforms.camera = gl.getUniformLocation(program, 'camera');
+  uniforms.cameraPosition = gl.getUniformLocation(program, 'camera_position');
 };
 
-  var vertices = [
-    -1.0, -1.0,
-    1.0, -1.0,
-    -1.0, 1.0,
+var vertices = [
+  -1.0, -1.0,
+  1.0, -1.0,
+  -1.0, 1.0,
 
-    1.0, -1.0,
-    1.0, 1.0,
-    -1.0, 1.0
-  ];
+  1.0, -1.0,
+  1.0, 1.0,
+  -1.0, 1.0
+];
 
-  var buffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+var buffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-  var time = 0.0;
+var time = 0.0;
 
 var run = function() {
   time += 0.01666;
@@ -124,6 +110,7 @@ var run = function() {
   // if (keys[65]) { // left
   //   velocity[0] -= 0.1;
   // }
+
   if (keys[87]) { // up
     velocity[0] += forward[0] / 100;
     velocity[1] += forward[1] / 100;
@@ -142,7 +129,6 @@ var run = function() {
   velocity[1] *= 0.86;
   velocity[2] *= 0.86;
 
-
   mat4.identity(cameraMatrix);
   mat4.perspective(cameraMatrix, rad(70), width / height, 0.1, 100);
 
@@ -153,17 +139,16 @@ var run = function() {
   gl.useProgram(program);
   gl.enableVertexAttribArray(0);
 
-  gl.uniform2fv(resolutionId, resolution);
-  gl.uniform1f(timeId, time);
+  gl.uniform2fv(uniforms.resolution, resolution);
+  gl.uniform1f(uniforms.time, time);
 
   mat4.invert(invertCameraMatrix, cameraMatrix);
 
-  gl.uniformMatrix4fv(cameraId, false, invertCameraMatrix);
-  gl.uniform3fv(cameraPositionId, position);
+  gl.uniformMatrix4fv(uniforms.camera, false, invertCameraMatrix);
+  gl.uniform3fv(uniforms.cameraPosition, position);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
-  gl.clear(gl.COLOR_BUFFER_BIT);
   gl.drawArrays(gl.TRIANGLES, 0, 6);
 
   window.requestAnimationFrame(run);
@@ -225,4 +210,12 @@ document.addEventListener('mousemove', function(e) {
 
   rotation[0] += y / 300;
   rotation[1] += x / 300;
+});
+
+document.addEventListener('keydown', function(e) {
+  keys[e.keyCode] = true;
+});
+
+document.addEventListener('keyup', function(e) {
+  keys[e.keyCode] = false;
 });
