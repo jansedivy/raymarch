@@ -1,4 +1,5 @@
 var mat4 = require('gl-matrix').mat4;
+var vec3 = require('gl-matrix').vec3;
 
 var get = function(url, callback) {
   var request = new XMLHttpRequest();
@@ -35,6 +36,8 @@ var position = [0, 0, 0];
 var velocity = [0, 0, 0];
 var rotation = [0, 0, 0];
 var forward = [0, 0, 0];
+var up = [0, 1, 0];
+var right = [0, 0, 0];
 var cameraMatrix = mat4.create();
 var invertCameraMatrix = mat4.create();
 
@@ -107,18 +110,27 @@ var run = function() {
   forward[1] = -Math.sin(rotation[0]);
   forward[2] = -Math.cos(rotation[1]) * Math.cos(rotation[0]);
 
-  // if (keys[65]) { // left
-  //   velocity[0] -= 0.1;
-  // }
+  vec3.cross(right, forward, up);
+  vec3.normalize(right, right);
+
+  if (keys[65]) { // left
+    velocity[0] -= right[0] / 100;
+    velocity[1] -= right[1] / 100;
+    velocity[2] -= right[2] / 100;
+  }
 
   if (keys[87]) { // up
     velocity[0] += forward[0] / 100;
     velocity[1] += forward[1] / 100;
     velocity[2] += forward[2] / 100;
   }
-  // if (keys[69] || keys[68]) { // right
-  //   velocity[0] += 0.1;
-  // }
+
+  if (keys[69] || keys[68]) { // right
+    velocity[0] += right[0] / 100;
+    velocity[1] += right[1] / 100;
+    velocity[2] += right[2] / 100;
+  }
+
   if (keys[83]) { // down
     velocity[0] -= forward[0] / 100;
     velocity[1] -= forward[1] / 100;
