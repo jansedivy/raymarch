@@ -17,12 +17,12 @@ float map(vec3 p) {
 float trace(vec3 o, vec3 r) {
   float t = 0.0;
 
-  for (int i=0; i<40; i++) {
+  for (int i=0; i<32; i++) {
     vec3 p = o + r * t;
 
     float d = map(p);
 
-    t += d * 0.4;
+    t += d * 0.5;
   }
 
   return t;
