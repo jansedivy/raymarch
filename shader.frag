@@ -12,10 +12,6 @@ float torus(vec3 p, vec2 t) {
   return length(q)-t.y;
 }
 
-float rand(vec3 co){
-    return fract(sin(dot(co.xyz ,vec3(12.9898,78.233, 42.3432))) * 43758.5453);
-}
-
 vec3 opTwist(vec3 p) {
   float c = cos(sin(time)*10.0*p.y);
   float s = sin(sin(time)*10.0*p.y);
@@ -45,8 +41,6 @@ float trace(vec3 o, vec3 r) {
 }
 
 void main(void) {
-  mat4 test = camera; // @remove
-
   vec2 uv = gl_FragCoord.xy / iResolution.xy;
 
   uv = uv * 2.0 - 1.0;
