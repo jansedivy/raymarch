@@ -18,10 +18,16 @@ var get = function(url, callback) {
   request.send(null);
 };
 
+var rad = function(value) {
+  return value * (Math.PI / 180);
+};
+
 var canvas = document.querySelector('canvas');
 var width = canvas.width = window.innerWidth;
 var height = canvas.height = window.innerHeight;
 var resolution = [width, height];
+
+canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointerLock || canvas.webkitRequestPointerLock;
 
 var gl = canvas.getContext('webgl');
 
@@ -40,10 +46,11 @@ var program = null;
 var position = [0, 10, 0];
 var velocity = [0, 0.1, 0];
 var rotation = [0, 0, 0];
-var angle = [0, 0, 0];
+var forward = [0, 0, 0];
 var cameraMatrix = mat4.create();
+var invertCameraMatrix = mat4.create();
 
-// var cameraPositionId = null;
+var cameraPositionId = null;
 var resolutionId = null;
 var timeId = null;
 var cameraId = null;
@@ -84,7 +91,7 @@ var createProgram = function() {
   resolutionId = gl.getUniformLocation(program, 'iResolution');
   timeId = gl.getUniformLocation(program, 'time');
   cameraId = gl.getUniformLocation(program, 'camera');
-  // cameraPositionId = gl.getUniformLocation(program, 'camera_position');
+  cameraPositionId = gl.getUniformLocation(program, 'camera_position');
 };
 
   var vertices = [
@@ -108,53 +115,51 @@ var run = function() {
 
   position[0] += velocity[0];
   position[1] += velocity[1];
-  position[1] += velocity[2];
+  position[2] += velocity[2];
 
-  if (keys[65]) { // left
-    velocity[0] -= 0.1;
-  }
+  forward[0] = Math.sin(rotation[1]) * Math.cos(rotation[0]);
+  forward[1] = -Math.sin(rotation[0]);
+  forward[2] = -Math.cos(rotation[1]) * Math.cos(rotation[0]);
+
+  // if (keys[65]) { // left
+  //   velocity[0] -= 0.1;
+  // }
   if (keys[87]) { // up
-    velocity[1] -= 0.1;
+    velocity[0] += forward[0] / 100;
+    velocity[1] += forward[1] / 100;
+    velocity[2] += forward[2] / 100;
   }
-  if (keys[69] || keys[68]) { // right
-    velocity[0] += 0.1;
-  }
+  // if (keys[69] || keys[68]) { // right
+  //   velocity[0] += 0.1;
+  // }
   if (keys[83]) { // down
-    velocity[1] += 0.1;
+    velocity[0] -= forward[0] / 100;
+    velocity[1] -= forward[1] / 100;
+    velocity[2] -= forward[2] / 100;
   }
 
   velocity[0] *= 0.86;
   velocity[1] *= 0.86;
   velocity[2] *= 0.86;
 
-  // angle[1] += 0.01;
-
-  rotation[0] = Math.sin(angle[1]) * Math.cos(angle[0]);
-  rotation[1] = -Math.sin(angle[0]);
-  rotation[2] = -Math.cos(angle[1]) * Math.cos(angle[0]);
 
   mat4.identity(cameraMatrix);
-
-  mat4.perspective(cameraMatrix, 45, width / height, 0.4, 20);
+  mat4.perspective(cameraMatrix, rad(70), width / height, 0.1, 100);
 
   mat4.rotateX(cameraMatrix, cameraMatrix, rotation[0]);
   mat4.rotateY(cameraMatrix, cameraMatrix, rotation[1]);
   mat4.rotateZ(cameraMatrix, cameraMatrix, rotation[2]);
-
-  if (position[1] < 2) {
-    position[1] = 2;
-    velocity[1] = 0;
-  }
-
-  mat4.translate(cameraMatrix, cameraMatrix, [-position[0], -position[1], -position[2]]);
 
   gl.useProgram(program);
   gl.enableVertexAttribArray(0);
 
   gl.uniform2fv(resolutionId, resolution);
   gl.uniform1f(timeId, time);
-  gl.uniformMatrix4fv(cameraId, false, cameraMatrix);
-  // gl.uniform3fv(cameraPositionId, position);
+
+  mat4.invert(invertCameraMatrix, cameraMatrix);
+
+  gl.uniformMatrix4fv(cameraId, false, invertCameraMatrix);
+  gl.uniform3fv(cameraPositionId, position);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
   gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
@@ -204,6 +209,10 @@ var reload = function() {
   });
 };
 
+document.addEventListener('mousedown', function(e) {
+  canvas.requestPointerLock();
+});
+
 document.addEventListener('keydown', function(e) {
   if (e.keyCode === 82) { // r
     reload();
@@ -214,6 +223,6 @@ document.addEventListener('mousemove', function(e) {
   var x = e.movementX || e.mozMovementX || e.webkitMovementX || 0;
   var y = e.movementY || e.mozMovementY || e.webkitMovementY || 0;
 
-  angle[0] += x / 300;
-  angle[1] += y / 300;
+  rotation[0] += y / 300;
+  rotation[1] += x / 300;
 });
