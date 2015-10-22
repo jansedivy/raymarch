@@ -7,29 +7,17 @@ uniform vec2 iResolution;
 uniform vec3 camera_position;
 uniform mat4 camera;
 
-float torus(vec3 p, vec2 t) {
-  vec2 q = vec2(length(p.xz)-t.x,p.y);
-  return length(q)-t.y;
-}
-
-vec3 opTwist(vec3 p) {
-  float c = cos(sin(time)*10.0*p.y);
-  float s = sin(sin(time)*10.0*p.y);
-  mat2 m = mat2(c,-s,s,c);
-  return vec3(m*p.xz,p.y);
-}
-
 float map(vec3 p) {
   vec3 c = vec3(2.0);
-  vec3 q = mod(p, c)-0.5*c;
+  vec3 q = mod(p, c) -0.5 * c;
 
-  return torus(opTwist(q), vec2(0.3, 0.1));
+  return length(q) - 0.25;
 }
 
 float trace(vec3 o, vec3 r) {
   float t = 0.0;
 
-  for (int i=0; i<32; i++) {
+  for (int i=0; i<40; i++) {
     vec3 p = o + r * t;
 
     float d = map(p);
@@ -53,7 +41,5 @@ void main(void) {
 
   float fog = 1.0 / (1.0 + t * t * 0.1);
 
-  vec3 fc = vec3(1.0 - fog) * vec3(0.4, 0.8, 0.9);
-
-  gl_FragColor = vec4(fc, 1.0);
+  gl_FragColor = vec4(vec3(fog), 1.0);
 }
