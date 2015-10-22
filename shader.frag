@@ -13,11 +13,11 @@ float torus(vec3 p, vec2 t) {
 }
 
 float opTwist(vec3 p, float offsetPosition) {
-  float c = cos(sin(offsetPosition + time)*20.0*p.y);
-  float s = sin(sin(offsetPosition + time)*20.0*p.y);
+  float c = cos(20.0*p.y);
+  float s = sin(20.0*p.y);
   mat2  m = mat2(c,-s,s,c);
   vec3  q = vec3(m*p.xz,p.y);
-  return torus(q, vec2(0.2));
+  return torus(q, vec2(0.3, 0.1));
 }
 
 float map(vec3 p) {
@@ -54,13 +54,11 @@ void main(void) {
 
   r = vec3(camera * vec4(r, 1.0));
 
-  /* r.xz *= mat2(cos(the), -sin(the), sin(the), cos(the)); */
-
   float t = trace(camera_position, r);
 
   float fog = 1.0 / (1.0 + t * t * 0.1);
 
-  vec3 fc = vec3(fog) * vec3(0.1, 0.8, 0.9);
+  vec3 fc = vec3(1.0 - fog) * vec3(0.4, 0.8, 0.9);
 
   gl_FragColor = vec4(fc, 1.0);
 }
