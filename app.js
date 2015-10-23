@@ -24,6 +24,8 @@ canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointe
 
 var gl = canvas.getContext('webgl');
 
+gl.viewport(0, 0, width, height);
+
 var fragReady = false;
 var vertReady = false;
 
@@ -32,17 +34,19 @@ var fragmentSource = '';
 
 var program = null;
 
-var position = [0, 0, 0];
-var velocity = [0, 0, 0];
-var rotation = [0, 0, 0];
-var forward = [0, 0, 0];
-var up = [0, 1, 0];
-var right = [0, 0, 0];
-var cameraMatrix = mat4.create();
-var invertCameraMatrix = mat4.create();
+var position = new Float32Array(3);
+var velocity = new Float32Array(3);
+var rotation = new Float32Array(3);
+var forward = new Float32Array(3);
+var right = new Float32Array(3);
 
-var uniforms = {
-};
+var up = new Float32Array(3);
+up[1] = 1;
+
+var cameraMatrix = new Float32Array(4 * 4);
+var invertCameraMatrix = new Float32Array(4 * 4);
+
+var uniforms = {};
 
 var createProgram = function() {
   if (program) {
@@ -184,7 +188,6 @@ get('shader.vert', function(source) {
   }
 });
 
-
 var reload = function() {
   fragReady = false;
   vertReady = false;
@@ -230,4 +233,11 @@ document.addEventListener('keydown', function(e) {
 
 document.addEventListener('keyup', function(e) {
   keys[e.keyCode] = false;
+});
+
+window.addEventListener('resize', function() {
+  width = canvas.width = window.innerWidth;
+  height = canvas.height = window.innerHeight;
+  resolution = [width, height];
+  gl.viewport(0, 0, width, height);
 });

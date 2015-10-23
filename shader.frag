@@ -8,20 +8,20 @@ uniform vec3 camera_position;
 uniform mat4 camera;
 
 float torus(vec3 p, vec2 t) {
-  vec2 q = vec2(length(p.xz)-t.x,p.y);
-  return length(q)-t.y;
+  vec2 q = vec2(length(p.xz) - t.x, p.y);
+  return length(q) - t.y;
 }
 
 vec3 opTwist(vec3 p) {
   float c = cos(sin(time)*10.0*p.y);
   float s = sin(sin(time)*10.0*p.y);
-  mat2 m = mat2(c,-s,s,c);
-  return vec3(m*p.xz,p.y);
+  mat2 m = mat2(c, -s, s, c);
+  return vec3(m * p.xz, p.y);
 }
 
 float map(vec3 p) {
   vec3 c = vec3(2.0);
-  vec3 q = mod(p, c)-0.5*c;
+  vec3 q = mod(p, c) - 0.5 * c;
 
   return torus(opTwist(q), vec2(0.3, 0.1));
 }
