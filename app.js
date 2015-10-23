@@ -24,8 +24,6 @@ canvas.requestPointerLock = canvas.requestPointerLock || canvas.mozRequestPointe
 
 var gl = canvas.getContext('webgl');
 
-gl.viewport(0, 0, width, height);
-
 var fragReady = false;
 var vertReady = false;
 
@@ -91,7 +89,6 @@ var vertices = [
   -1.0, -1.0,
   1.0, -1.0,
   -1.0, 1.0,
-
   1.0, -1.0,
   1.0, 1.0,
   -1.0, 1.0
@@ -151,6 +148,8 @@ var run = function() {
   mat4.rotateX(cameraMatrix, cameraMatrix, rotation[0]);
   mat4.rotateY(cameraMatrix, cameraMatrix, rotation[1]);
   mat4.rotateZ(cameraMatrix, cameraMatrix, rotation[2]);
+
+  gl.viewport(0, 0, width, height);
 
   gl.useProgram(program);
   gl.enableVertexAttribArray(0);
@@ -239,5 +238,4 @@ window.addEventListener('resize', function() {
   width = canvas.width = window.innerWidth;
   height = canvas.height = window.innerHeight;
   resolution = [width, height];
-  gl.viewport(0, 0, width, height);
 });
