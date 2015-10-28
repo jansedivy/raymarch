@@ -1,6 +1,6 @@
 # Raymarch
 
-Simple distance field Raymarcher using WebGL [demo](http://raymarch.jansedivy.com)
+Simple distance field Raymarcher using WebGL ([demo](http://raymarch.jansedivy.com))
 
 ![preview](https://cldup.com/PXDgoIzwlJ.thumb.png)
 
